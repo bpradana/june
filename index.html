@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>June 2024</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Courier+Prime:ital,wght@0,400;1,400&display=swap');
+
+  :root {
+    --white: #f0ede8;
+    --black: #0a0a09;
+    --gray: #888880;
+    --gray-light: #ccc8c0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Courier Prime', monospace;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  #dither-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.15;
+  }
+
+  #city-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s ease;
+  }
+  #city-canvas.visible { opacity: 0.55; }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: -200%;
+    z-index: 2;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    opacity: 0.04;
+    animation: grain 0.5s steps(2) infinite;
+  }
+  @keyframes grain {
+    0%   { transform: translate(0,0); }
+    25%  { transform: translate(-2%,-1%); }
+    50%  { transform: translate(1%,2%); }
+    75%  { transform: translate(-1%,1%); }
+    100% { transform: translate(2%,-2%); }
+  }
+
+  /* ── INTRO ── */
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    transition: opacity 1.5s ease, transform 1.5s ease;
+  }
+  #intro.out { opacity: 0; transform: translateY(-20px); pointer-events: none; }
+
+  .intro-year {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(5rem, 28vw, 13rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--white);
+    opacity: 0;
+    animation: fadeUp 1.2s ease 0.5s forwards;
+    position: relative;
+  }
+  .intro-year::after {
+    content: '2024';
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+    transform: translate(4px, 4px);
+    z-index: -1;
+  }
+
+  .intro-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--gray);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 1.2s ease 1.1s forwards;
+  }
+
+  .intro-enter {
+    margin-top: 2.5rem;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 1rem 2.2rem;
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeUp 1.2s ease 1.9s forwards;
+    background: transparent;
+    color: var(--gray-light);
+    transition: border-color 0.3s, color 0.3s, background 0.3s;
+  }
+  .intro-enter:hover {
+    border-color: var(--white);
+    color: var(--black);
+    background: var(--white);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MAIN ── */
+  #main { position: relative; z-index: 10; opacity: 0; transition: opacity 1.5s ease 0.5s; }
+  #main.visible { opacity: 1; }
+
+  section {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 10vw, 7rem) clamp(1.5rem, 6vw, 5rem);
+    position: relative;
+  }
+
+  .label {
+    font-size: 0.58rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .label.in { opacity: 1; transform: none; }
+
+  .prose {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    line-height: 1.5;
+    max-width: 22ch;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 1s ease 0.1s, transform 1s ease 0.1s;
+  }
+  .prose.in { opacity: 1; transform: none; }
+
+  .small-prose {
+    font-family: 'Courier Prime', monospace;
+    font-size: clamp(0.78rem, 2.3vw, 0.95rem);
+    line-height: 1.95;
+    max-width: 50ch;
+    color: var(--gray-light);
+    margin-top: 2rem;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.9s ease 0.25s, transform 0.9s ease 0.25s;
+  }
+  .small-prose.in { opacity: 1; transform: none; }
+
+  .hr-accent {
+    width: 2rem;
+    height: 1px;
+    background: var(--white);
+    margin: 1.5rem 0;
+    opacity: 0;
+    transition: opacity 0.8s ease 0.15s, width 0.8s ease 0.15s;
+  }
+  .hr-accent.in { opacity: 1; width: 4rem; }
+
+  /* ── JUNE ── */
+  #june-section { overflow: hidden; }
+  .june-bg-text {
+    position: absolute;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(7rem, 45vw, 24rem);
+    font-weight: 700;
+    font-style: italic;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.05);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.05em;
+    animation: juneFloat 8s ease-in-out infinite;
+  }
+  @keyframes juneFloat {
+    0%, 100% { transform: translate(-50%,-50%) translateY(0); }
+    50%       { transform: translate(-50%,-50%) translateY(-12px); }
+  }
+
+  /* ── DOORS ── */
+  .doors-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 2rem;
+    opacity: 0;
+    transition: opacity 1s ease 0.3s;
+  }
+  .doors-container.in { opacity: 1; }
+
+  .door-line {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 3.5vw, 1.5rem);
+    color: var(--gray);
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    cursor: default;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    line-height: 1.3;
+    transition: color 0.4s, padding-left 0.4s;
+  }
+  .door-line::before {
+    content: '→';
+    font-style: normal;
+    font-family: monospace;
+    font-size: 0.65rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    flex-shrink: 0;
+  }
+  .door-line:hover { color: var(--white); padding-left: 0.6rem; }
+  .door-line:hover::before { opacity: 1; }
+
+  /* ── TIMESTAMP ── */
+  .timestamp {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gray);
+    margin-bottom: 1rem;
+    opacity: 0;
+    transition: opacity 0.8s ease 0.2s;
+  }
+  .timestamp.in { opacity: 1; }
+
+  /* ── FINAL ── */
+  #final-section { padding-top: 15svh; padding-bottom: 15svh; align-items: flex-start; }
+
+  .final-prose {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 5.5vw, 3.5rem);
+    line-height: 1.5;
+    max-width: 20ch;
+  }
+  .final-prose .line {
+    display: block;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .final-prose .line.in { opacity: 1; transform: none; }
+
+  .signature {
+    margin-top: 5rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--gray);
+    text-transform: uppercase;
+    max-width: 40ch;
+    line-height: 1.8;
+    opacity: 0;
+    transition: opacity 1s ease 0.6s;
+  }
+  .signature.in { opacity: 1; }
+
+  /* ── PROGRESS ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    background: var(--white);
+    z-index: 200;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ── CHAPTER DOTS ── */
+  #chapter-indicator {
+    position: fixed;
+    bottom: 2rem;
+    right: 1.5rem;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .chapter-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .chapter-dot.active { background: var(--white); transform: scale(1.6); }
+
+  /* ── DITHER OVERLAY ── */
+  #dither-overlay {
+    position: fixed; inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: var(--black);
+  }
+
+  ::-webkit-scrollbar { width: 2px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+  ::selection { background: rgba(255,255,255,0.12); }
+</style>
+</head>
+<body>
+
+<canvas id="dither-canvas"></canvas>
+<canvas id="city-canvas"></canvas>
+<div id="dither-overlay"></div>
+<div id="progress"></div>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="intro-year">2024</div>
+  <div class="intro-sub">A memory. A person. A June.</div>
+  <button class="intro-enter" id="enter-btn">Enter the archive</button>
+</div>
+
+<!-- CHAPTER DOTS -->
+<div id="chapter-indicator">
+  <div class="chapter-dot active"></div>
+  <div class="chapter-dot"></div>
+  <div class="chapter-dot"></div>
+  <div class="chapter-dot"></div>
+  <div class="chapter-dot"></div>
+  <div class="chapter-dot"></div>
+  <div class="chapter-dot"></div>
+  <div class="chapter-dot"></div>
+</div>
+
+<main id="main">
+
+  <section id="s0">
+    <div class="label">archive / 001</div>
+    <div class="prose">There are years you leave like you're closing a tab you don't need anymore.</div>
+    <div class="hr-accent"></div>
+    <div class="small-prose">Quietly. Unceremoniously. Just gone.<br>They turn into timestamps on old photos and passwords you barely remember setting.</div>
+  </section>
+
+  <section id="s1">
+    <div class="label">archive / 002 — the pulse</div>
+    <div class="prose">And then there's 2024.</div>
+    <div class="hr-accent"></div>
+    <div class="small-prose">I miss 2024 in a way that makes me feel stupid when I say it out loud. It was messy and unfinished, full of days that didn't even feel special while they were happening.<br><br>But it had a pulse.</div>
+    <div class="timestamp" style="margin-top:2.5rem">last felt alive — 18 months ago</div>
+    <div class="small-prose" style="margin-top:0">Wake up. Work. Eat. Scroll. Sleep. Repeat.<br>Like I'm just keeping the machine warm.</div>
+  </section>
+
+  <section id="s2">
+    <div class="label">archive / 003 — memory</div>
+    <div class="prose">The present doesn't stick.</div>
+    <div class="hr-accent"></div>
+    <div class="small-prose">Ask me what I ate yesterday and I have to guess.<br>Ask me what I did two weekends ago and I'll give you a vague outline like I'm describing someone else's life.<br><br>But 2024?<br><br>I remember 2024 with unfair clarity. Like my brain decided that year was worth saving in high resolution and everything after it can be stored as a blur.</div>
+  </section>
+
+  <section id="june-section">
+    <div class="june-bg-text">June</div>
+    <div class="label" style="position:relative;z-index:2">archive / 004 — june 2024</div>
+    <div class="prose" style="position:relative;z-index:2">That month shows up in my head like a location I can still navigate without a map.</div>
+    <div class="hr-accent" style="position:relative;z-index:2"></div>
+    <div class="small-prose" style="position:relative;z-index:2">I remember the heat that clung to my clothes. The way the nights felt heavy but alive, like the city was still awake even when it should've been asleep.<br><br>I remember how my days were a mess, and still, somehow, I had this thread running through it.<br><br>You.</div>
+  </section>
+
+  <section id="s4">
+    <div class="label">archive / 005 — the dream</div>
+    <div class="prose">In the dream, everything is fine.</div>
+    <div class="hr-accent"></div>
+    <div class="small-prose">You're there like it's normal. Like I didn't lose you. Sometimes you don't even say anything. You're just in the passenger seat, half-lit by streetlights, legs tucked in, looking out the window like you own the night.<br><br>And the worst part is how my body believes it.<br><br>I wake up with that leftover warmth in my chest, and for half a second I think: <em>oh. Right. We're still here.</em><br><br>Then the room comes back. The ceiling. The silence. The actual year.</div>
+  </section>
+
+  <section id="s5">
+    <div class="label">archive / 006 — the doors</div>
+    <div class="prose">My mind makes doors.</div>
+    <div class="hr-accent"></div>
+    <div class="doors-container">
+      <div class="door-line">What if I said the thing I didn't say.</div>
+      <div class="door-line">What if I stayed.</div>
+      <div class="door-line">What if I left earlier.</div>
+      <div class="door-line">What if I didn't let it rot into silence.</div>
+      <div class="door-line">What if I was braver when it mattered.</div>
+    </div>
+    <div class="small-prose" style="margin-top:2rem;font-style:italic">Because I can't actually open any of those doors, my brain starts building entire alternate lives behind them.</div>
+  </section>
+
+  <section id="s6" style="min-height:150svh">
+    <div class="label">archive / 007 — the drive</div>
+    <div class="prose">Still in the car.<br>Still waiting at red lights<br>that never change.</div>
+    <div class="hr-accent"></div>
+    <div class="small-prose">We'd circle the same streets like we were trying to wear a groove into them. Windows down, playlists looping, the kind of conversation you only have at 1 or 2 a.m. when nobody's performing.<br><br>Just talking. Just existing next to each other.<br><br>That quiet kind of closeness that doesn't announce itself as important until it's gone.<br><br>I didn't know I was building a memory that would later ruin my sleep.<br><br>That's what time does. It doesn't warn you. It doesn't tap you on the shoulder and say, hey, pay attention, you're going to miss this so badly it'll make you reckless. It just lets you live it like it's ordinary, then takes it away and acts like you should be fine.</div>
+  </section>
+
+  <section id="final-section">
+    <div class="label">archive / 008 — what remains</div>
+    <div class="final-prose">
+      <span class="line">Until then,</span>
+      <span class="line" style="transition-delay:0.15s">2024 stays.</span>
+      <span class="line" style="color:var(--gray);font-size:0.55em;margin-top:2rem;line-height:2;transition-delay:0.3s">As a person.</span>
+      <span class="line" style="color:var(--gray);font-size:0.55em;line-height:2;transition-delay:0.45s">As June.</span>
+      <span class="line" style="color:var(--gray);font-size:0.55em;line-height:2;transition-delay:0.6s">As a car moving through the city too late at night.</span>
+      <span class="line" style="color:var(--gray);font-size:0.55em;line-height:2;transition-delay:0.75s">As a dream I keep having like my brain doesn't know when to let go.</span>
+    </div>
+    <div class="signature">
+      I just want to wake up one day<br>and have the present stick again.
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── DITHER CANVAS ─────────────────────────────────────────────────────────────
+const ditherCanvas = document.getElementById('dither-canvas');
+const dctx = ditherCanvas.getContext('2d');
+
+function resizeDither() {
+  ditherCanvas.width = Math.floor(window.innerWidth / 2);
+  ditherCanvas.height = Math.floor(window.innerHeight / 2);
+  ditherCanvas.style.width = window.innerWidth + 'px';
+  ditherCanvas.style.height = window.innerHeight + 'px';
+  drawDither();
+}
+
+const bayer4 = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+
+function drawDither() {
+  const w = ditherCanvas.width, h = ditherCanvas.height;
+  const img = dctx.createImageData(w, h);
+  const d = img.data;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const noise = Math.random();
+      const threshold = bayer4[y % 4][x % 4] / 16;
+      const v = noise > threshold ? 20 : 0;
+      d[i] = v; d[i+1] = v; d[i+2] = v; d[i+3] = 255;
+    }
+  }
+  dctx.putImageData(img, 0, 0);
+}
+
+resizeDither();
+let ditherFrame = 0;
+function tickDither() {
+  ditherFrame++;
+  if (ditherFrame % 6 === 0) drawDither();
+  requestAnimationFrame(tickDither);
+}
+tickDither();
+window.addEventListener('resize', resizeDither);
+
+// ── THREE.JS CITY LIGHTS ──────────────────────────────────────────────────────
+const cityCanvas = document.getElementById('city-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: cityCanvas, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 5;
+
+const COUNT = window.innerWidth < 600 ? 600 : 1200;
+const positions = new Float32Array(COUNT * 3);
+const opacities = new Float32Array(COUNT);
+const speeds = new Float32Array(COUNT);
+
+for (let i = 0; i < COUNT; i++) {
+  positions[i*3]   = (Math.random() - 0.5) * 22;
+  positions[i*3+1] = (Math.random() - 0.5) * 13;
+  positions[i*3+2] = (Math.random() - 0.5) * 8 - 4;
+  opacities[i] = Math.random() * 0.8 + 0.2;
+  speeds[i]    = Math.random() * 0.012 + 0.003;
+}
+
+const geom = new THREE.BufferGeometry();
+geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+const mat = new THREE.PointsMaterial({
+  color: 0xf0ede8,
+  size: 0.04,
+  sizeAttenuation: true,
+  transparent: true,
+  opacity: 0.85,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+
+const points = new THREE.Points(geom, mat);
+scene.add(points);
+
+// Streaks
+const streakGroup = new THREE.Group();
+scene.add(streakGroup);
+for (let i = 0; i < 30; i++) {
+  const len = Math.random() * 1.8 + 0.2;
+  const g = new THREE.BufferGeometry();
+  const x = (Math.random() - 0.5) * 20;
+  const y = (Math.random() - 0.5) * 11;
+  const z = -Math.random() * 7 - 1;
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([x, y, z, x+len, y, z]), 3));
+  const m = new THREE.LineBasicMaterial({
+    color: 0xffffff, transparent: true,
+    opacity: Math.random() * 0.25 + 0.03,
+    blending: THREE.AdditiveBlending
+  });
+  streakGroup.add(new THREE.Line(g, m));
+}
+
+let cityActive = false;
+let animT = 0;
+
+function renderCity() {
+  requestAnimationFrame(renderCity);
+  if (!cityActive) return;
+  animT += 0.001;
+  const pos = geom.attributes.position.array;
+  for (let i = 0; i < COUNT; i++) {
+    pos[i*3] -= speeds[i] * 0.6;
+    if (pos[i*3] < -11) pos[i*3] = 11;
+  }
+  geom.attributes.position.needsUpdate = true;
+  camera.position.y = Math.sin(animT * 0.8) * 0.06;
+  camera.position.x = Math.cos(animT * 0.5) * 0.03;
+  streakGroup.children.forEach((l, i) => {
+    l.position.x -= 0.006;
+    if (l.position.x < -18) l.position.x = 18;
+  });
+  renderer.render(scene, camera);
+}
+renderCity();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ── INTRO ─────────────────────────────────────────────────────────────────────
+const intro = document.getElementById('intro');
+const mainEl = document.getElementById('main');
+const cityEl = document.getElementById('city-canvas');
+
+document.getElementById('enter-btn').addEventListener('click', () => {
+  intro.classList.add('out');
+  setTimeout(() => {
+    intro.style.display = 'none';
+    mainEl.classList.add('visible');
+    cityEl.classList.add('visible');
+    cityActive = true;
+  }, 1500);
+});
+
+// ── SCROLL ANIMATIONS ─────────────────────────────────────────────────────────
+const progress = document.getElementById('progress');
+const sections = document.querySelectorAll('section');
+const dots = document.querySelectorAll('.chapter-dot');
+const ditherOverlay = document.getElementById('dither-overlay');
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(({ target, isIntersecting }) => {
+    if (!isIntersecting) return;
+    target.querySelectorAll('.label,.prose,.small-prose,.hr-accent,.timestamp,.doors-container,.signature').forEach((el, i) => {
+      setTimeout(() => el.classList.add('in'), i * 130);
+    });
+    target.querySelectorAll('.final-prose .line').forEach(l => l.classList.add('in'));
+    // Amplify city lights near june/drive sections
+    if (target.id === 'june-section' || target.id === 's6') {
+      cityEl.style.opacity = '0.75';
+    } else {
+      cityEl.style.opacity = '0.55';
+    }
+  });
+}, { threshold: 0.15 });
+
+sections.forEach(s => io.observe(s));
+
+// Section tracking for nav dots
+const sio = new IntersectionObserver((entries) => {
+  entries.forEach(({ target, isIntersecting }) => {
+    if (!isIntersecting) return;
+    const idx = [...sections].indexOf(target);
+    dots.forEach(d => d.classList.remove('active'));
+    if (dots[idx]) dots[idx].classList.add('active');
+  });
+}, { threshold: 0.5 });
+sections.forEach(s => sio.observe(s));
+
+// Progress bar
+window.addEventListener('scroll', () => {
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  progress.style.width = pct + '%';
+}, { passive: true });
+
+// Section transition dither flash
+let lastSec = -1;
+const tio = new IntersectionObserver((entries) => {
+  entries.forEach(({ target, isIntersecting }) => {
+    if (!isIntersecting) return;
+    const idx = [...sections].indexOf(target);
+    if (idx === lastSec) return;
+    lastSec = idx;
+    ditherOverlay.style.opacity = '0.18';
+    setTimeout(() => { ditherOverlay.style.opacity = '0'; }, 350);
+  });
+}, { threshold: 0.65 });
+sections.forEach(s => tio.observe(s));
+</script>
+</body>
+</html>
+
