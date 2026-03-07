@@ -12,6 +12,8 @@
     --black: #0a0a09;
     --gray: #888880;
     --gray-light: #ccc8c0;
+    --warm: #c5a98d;
+    --cold: #9ea8bb;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,6 +26,8 @@
     overflow-x: hidden;
     cursor: crosshair;
   }
+
+  body.archive-open { cursor: default; }
 
   #dither-canvas {
     position: fixed;
@@ -89,7 +93,7 @@
     position: relative;
   }
   .intro-year::after {
-    content: '2024';
+    content: 'June, 2024';
     position: absolute;
     inset: 0;
     color: transparent;
@@ -99,8 +103,8 @@
   }
 
   .intro-sub {
-    font-size: 0.65rem;
-    letter-spacing: 0.35em;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
     color: var(--gray);
     text-transform: uppercase;
     opacity: 0;
@@ -144,7 +148,14 @@
     justify-content: center;
     padding: clamp(2rem, 10vw, 7rem) clamp(1.5rem, 6vw, 5rem);
     position: relative;
+    border-top: 1px solid rgba(255,255,255,0.07);
   }
+
+  section:first-of-type { border-top: none; }
+
+  .fragment-sparse .prose { max-width: 18ch; line-height: 1.7; }
+  .fragment-cinematic .prose { max-width: 25ch; line-height: 1.35; }
+  .fragment-lingering .small-prose { max-width: 45ch; line-height: 2.05; }
 
   .label {
     font-size: 0.58rem;
@@ -193,6 +204,38 @@
   .hr-accent.in { opacity: 1; width: 4rem; }
 
   /* ── JUNE ── */
+  #june-interlude {
+    background: radial-gradient(circle at 60% 40%, rgba(197,169,141,0.2), transparent 65%);
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .june-interlude-word {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(4rem, 18vw, 11rem);
+    font-style: italic;
+    line-height: 1;
+    margin-bottom: 1rem;
+    color: #f3e3d2;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 1.3s ease, transform 1.3s ease;
+  }
+  .june-interlude-word.in { opacity: 1; transform: none; }
+
+  .bridge-line {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(240,237,232,0.55);
+    max-width: 42ch;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease 0.2s, transform 1s ease 0.2s;
+  }
+  .bridge-line.in { opacity: 1; transform: none; }
+
   #june-section { overflow: hidden; }
   .june-bg-text {
     position: absolute;
@@ -209,48 +252,59 @@
     pointer-events: none;
     user-select: none;
     letter-spacing: -0.05em;
-    animation: juneFloat 8s ease-in-out infinite;
+    animation: juneFloat 9s ease-in-out infinite;
   }
   @keyframes juneFloat {
     0%, 100% { transform: translate(-50%,-50%) translateY(0); }
     50%       { transform: translate(-50%,-50%) translateY(-12px); }
   }
 
-  /* ── DOORS ── */
-  .doors-container {
-    display: flex;
-    flex-direction: column;
-    margin-top: 2rem;
-    opacity: 0;
-    transition: opacity 1s ease 0.3s;
+  /* ── DREAM / WAKING ── */
+  .dream-state,
+  .wake-state {
+    margin-top: 1.8rem;
+    padding: 1.2rem 0;
+    max-width: 52ch;
   }
-  .doors-container.in { opacity: 1; }
 
-  .door-line {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: clamp(1rem, 3.5vw, 1.5rem);
+  .dream-state {
+    color: rgba(240,237,232,0.85);
+    border-left: 1px solid rgba(197,169,141,0.4);
+    padding-left: 1.1rem;
+  }
+
+  .wake-state {
+    color: #c8ced9;
+    border-left: 1px solid rgba(158,168,187,0.4);
+    padding-left: 1.1rem;
+  }
+
+  .state-label {
+    font-size: 0.56rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
     color: var(--gray);
-    padding: 0.65rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    cursor: default;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    line-height: 1.3;
-    transition: color 0.4s, padding-left 0.4s;
+    margin-bottom: 0.9rem;
   }
-  .door-line::before {
-    content: '→';
-    font-style: normal;
-    font-family: monospace;
-    font-size: 0.65rem;
+
+  .dream-line,
+  .wake-line {
+    display: block;
     opacity: 0;
-    transition: opacity 0.3s;
-    flex-shrink: 0;
+    transform: translateY(16px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    margin-bottom: 0.8rem;
+    line-height: 1.85;
+    font-size: clamp(0.84rem, 2.3vw, 1rem);
   }
-  .door-line:hover { color: var(--white); padding-left: 0.6rem; }
-  .door-line:hover::before { opacity: 1; }
+
+  .dream-line.in,
+  .wake-line.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .wake-state .wake-line { letter-spacing: 0.02em; }
 
   /* ── TIMESTAMP ── */
   .timestamp {
@@ -265,6 +319,7 @@
 
   /* ── FINAL ── */
   #final-section { padding-top: 15svh; padding-bottom: 15svh; align-items: flex-start; }
+  #final-section { border-top: none; min-height: 120svh; }
 
   .final-prose {
     font-family: 'Playfair Display', serif;
@@ -293,6 +348,17 @@
   }
   .signature.in { opacity: 1; }
 
+  .archive-close {
+    margin-top: 8rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: rgba(240,237,232,0.5);
+    opacity: 0;
+    transition: opacity 1.4s ease 0.9s;
+  }
+  .archive-close.in { opacity: 1; }
+
   /* ── PROGRESS ── */
   #progress {
     position: fixed;
@@ -313,6 +379,11 @@
     display: flex;
     flex-direction: column;
     gap: 7px;
+  }
+
+  #chapter-indicator.hidden {
+    opacity: 0;
+    transition: opacity 0.8s ease;
   }
   .chapter-dot {
     width: 4px; height: 4px;
@@ -347,33 +418,26 @@
 
 <!-- INTRO -->
 <div id="intro">
-  <div class="intro-year">2024</div>
-  <div class="intro-sub">A memory. A person. A June.</div>
+  <div class="intro-year">June, 2024</div>
+  <div class="intro-sub">A short interactive memoir told in eight fragments.</div>
   <button class="intro-enter" id="enter-btn">Enter the archive</button>
 </div>
 
+<audio id="ceilings-audio" preload="none" src="ceilings.mp3"></audio>
+
 <!-- CHAPTER DOTS -->
-<div id="chapter-indicator">
-  <div class="chapter-dot active"></div>
-  <div class="chapter-dot"></div>
-  <div class="chapter-dot"></div>
-  <div class="chapter-dot"></div>
-  <div class="chapter-dot"></div>
-  <div class="chapter-dot"></div>
-  <div class="chapter-dot"></div>
-  <div class="chapter-dot"></div>
-</div>
+<div id="chapter-indicator"></div>
 
 <main id="main">
 
-  <section id="s0">
+  <section id="s0" class="fragment-sparse">
     <div class="label">archive / 001</div>
     <div class="prose">There are years you leave like you're closing a tab you don't need anymore.</div>
     <div class="hr-accent"></div>
     <div class="small-prose">Quietly. Unceremoniously. Just gone.<br>They turn into timestamps on old photos and passwords you barely remember setting.</div>
   </section>
 
-  <section id="s1">
+  <section id="s1" class="fragment-lingering">
     <div class="label">archive / 002 — the pulse</div>
     <div class="prose">And then there's 2024.</div>
     <div class="hr-accent"></div>
@@ -382,11 +446,17 @@
     <div class="small-prose" style="margin-top:0">Wake up. Work. Eat. Scroll. Sleep. Repeat.<br>Like I'm just keeping the machine warm.</div>
   </section>
 
-  <section id="s2">
+  <section id="s2" class="fragment-cinematic">
     <div class="label">archive / 003 — memory</div>
     <div class="prose">The present doesn't stick.</div>
     <div class="hr-accent"></div>
     <div class="small-prose">Ask me what I ate yesterday and I have to guess.<br>Ask me what I did two weekends ago and I'll give you a vague outline like I'm describing someone else's life.<br><br>But 2024?<br><br>I remember 2024 with unfair clarity. Like my brain decided that year was worth saving in high resolution and everything after it can be stored as a blur.</div>
+  </section>
+
+  <section id="june-interlude">
+    <div class="label">transmission</div>
+    <div class="bridge-line">Everything after that point has blur. One place still has edges.</div>
+    <div class="june-interlude-word">June</div>
   </section>
 
   <section id="june-section">
@@ -397,32 +467,40 @@
     <div class="small-prose" style="position:relative;z-index:2">I remember the heat that clung to my clothes. The way the nights felt heavy but alive, like the city was still awake even when it should've been asleep.<br><br>I remember how my days were a mess, and still, somehow, I had this thread running through it.<br><br>You.</div>
   </section>
 
-  <section id="s4">
+  <section id="s4" class="fragment-lingering">
     <div class="label">archive / 005 — the dream</div>
     <div class="prose">In the dream, everything is fine.</div>
     <div class="hr-accent"></div>
-    <div class="small-prose">You're there like it's normal. Like I didn't lose you. Sometimes you don't even say anything. You're just in the passenger seat, half-lit by streetlights, legs tucked in, looking out the window like you own the night.<br><br>And the worst part is how my body believes it.<br><br>I wake up with that leftover warmth in my chest, and for half a second I think: <em>oh. Right. We're still here.</em><br><br>Then the room comes back. The ceiling. The silence. The actual year.</div>
-  </section>
-
-  <section id="s5">
-    <div class="label">archive / 006 — the doors</div>
-    <div class="prose">My mind makes doors.</div>
-    <div class="hr-accent"></div>
-    <div class="doors-container">
-      <div class="door-line">What if I said the thing I didn't say.</div>
-      <div class="door-line">What if I stayed.</div>
-      <div class="door-line">What if I left earlier.</div>
-      <div class="door-line">What if I didn't let it rot into silence.</div>
-      <div class="door-line">What if I was braver when it mattered.</div>
+    <div class="dream-state">
+      <div class="state-label">dream state</div>
+      <span class="dream-line">You're there like it's normal.</span>
+      <span class="dream-line">Like I didn't lose you.</span>
+      <span class="dream-line">Sometimes you don't even say anything.</span>
+      <span class="dream-line">You're just in the passenger seat, half-lit by streetlights, legs tucked in, looking out the window like you own the night.</span>
+      <span class="dream-line">And the worst part is how my body believes it.</span>
     </div>
-    <div class="small-prose" style="margin-top:2rem;font-style:italic">Because I can't actually open any of those doors, my brain starts building entire alternate lives behind them.</div>
+    <div class="wake-state">
+      <div class="state-label">waking state</div>
+      <span class="wake-line">I wake up with that leftover warmth in my chest, and for half a second I think: <em>oh. Right. We're still here.</em></span>
+      <span class="wake-line">Then the room comes back.</span>
+      <span class="wake-line">The ceiling.</span>
+      <span class="wake-line">The silence.</span>
+      <span class="wake-line">The actual year.</span>
+    </div>
   </section>
 
-  <section id="s6" style="min-height:150svh">
-    <div class="label">archive / 007 — the drive</div>
-    <div class="prose">Still in the car.<br>Still waiting at red lights<br>that never change.</div>
+  <section id="s5" class="fragment-lingering">
+    <div class="label">archive / 006</div>
+    <div class="prose">My mind reruns things.</div>
     <div class="hr-accent"></div>
-    <div class="small-prose">We'd circle the same streets like we were trying to wear a groove into them. Windows down, playlists looping, the kind of conversation you only have at 1 or 2 a.m. when nobody's performing.<br><br>Just talking. Just existing next to each other.<br><br>That quiet kind of closeness that doesn't announce itself as important until it's gone.<br><br>I didn't know I was building a memory that would later ruin my sleep.<br><br>That's what time does. It doesn't warn you. It doesn't tap you on the shoulder and say, hey, pay attention, you're going to miss this so badly it'll make you reckless. It just lets you live it like it's ordinary, then takes it away and acts like you should be fine.</div>
+    <div class="small-prose">A sentence I could have said better.<br>A pause that meant more than I understood at the time.<br>A turn in the conversation that still feels unfinished.<br>Small moments that looked ordinary when they happened and heavier after they were gone.<br><br>I go back to them more than I should.<br>I hold them still and study them from different angles, like there is something in them I missed the first time.<br><br>Maybe there was.<br>Maybe that is all memory is after a while—attention with nowhere to go.</div>
+  </section>
+
+  <section id="s6" style="min-height:150svh" class="fragment-cinematic">
+    <div class="label">archive / 007 — the drive</div>
+    <div class="prose" data-parallax="0.06">Still in the car.<br>Still waiting at red lights<br>that never change.</div>
+    <div class="hr-accent"></div>
+    <div class="small-prose" data-parallax="0.1">We'd circle the same streets like we were trying to wear a groove into them. Windows down, playlists looping, the kind of conversation you only have at 1 or 2 a.m. when nobody's performing.<br><br>Just talking.<br>Just existing next to each other.<br><br>That quiet kind of closeness that doesn't announce itself as important until it's gone.<br><br>Time doesn't warn you.<br>It just lets you live it like it's ordinary, then takes it away and acts like you should be fine.</div>
   </section>
 
   <section id="final-section">
@@ -438,6 +516,7 @@
     <div class="signature">
       I just want to wake up one day<br>and have the present stick again.
     </div>
+    <div class="archive-close">Archive closed · end of record</div>
   </section>
 
 </main>
@@ -575,9 +654,61 @@ window.addEventListener('resize', () => {
 const intro = document.getElementById('intro');
 const mainEl = document.getElementById('main');
 const cityEl = document.getElementById('city-canvas');
+const chapterIndicator = document.getElementById('chapter-indicator');
+const ceilingsAudio = document.getElementById('ceilings-audio');
+let audioUnlocked = false;
+let driveAudioStarted = false;
+let audioFadeFrame;
+
+const sections = [...document.querySelectorAll('section')];
+sections.forEach((_, idx) => {
+  const dot = document.createElement('div');
+  dot.className = 'chapter-dot' + (idx === 0 ? ' active' : '');
+  chapterIndicator.appendChild(dot);
+});
+const dots = [...document.querySelectorAll('.chapter-dot')];
+
+function unlockAudioContext() {
+  if (audioUnlocked) return;
+  ceilingsAudio.volume = 0;
+  ceilingsAudio.muted = false;
+  ceilingsAudio.play().then(() => {
+    ceilingsAudio.pause();
+    ceilingsAudio.currentTime = 0;
+    audioUnlocked = true;
+  }).catch(() => {
+    audioUnlocked = false;
+  });
+}
+
+function fadeInDriveAudio() {
+  if (driveAudioStarted || !audioUnlocked) return;
+  driveAudioStarted = true;
+  ceilingsAudio.volume = 0;
+  ceilingsAudio.currentTime = 0;
+  ceilingsAudio.play().catch(() => {
+    driveAudioStarted = false;
+    return;
+  });
+
+  const target = 0.22;
+  const start = performance.now();
+  const duration = 5000;
+
+  const step = (now) => {
+    const t = Math.min((now - start) / duration, 1);
+    ceilingsAudio.volume = target * t;
+    if (t < 1) {
+      audioFadeFrame = requestAnimationFrame(step);
+    }
+  };
+  audioFadeFrame = requestAnimationFrame(step);
+}
 
 document.getElementById('enter-btn').addEventListener('click', () => {
+  unlockAudioContext();
   intro.classList.add('out');
+  document.body.classList.add('archive-open');
   setTimeout(() => {
     intro.style.display = 'none';
     mainEl.classList.add('visible');
@@ -588,25 +719,34 @@ document.getElementById('enter-btn').addEventListener('click', () => {
 
 // ── SCROLL ANIMATIONS ─────────────────────────────────────────────────────────
 const progress = document.getElementById('progress');
-const sections = document.querySelectorAll('section');
-const dots = document.querySelectorAll('.chapter-dot');
 const ditherOverlay = document.getElementById('dither-overlay');
 
 const io = new IntersectionObserver((entries) => {
   entries.forEach(({ target, isIntersecting }) => {
     if (!isIntersecting) return;
-    target.querySelectorAll('.label,.prose,.small-prose,.hr-accent,.timestamp,.doors-container,.signature').forEach((el, i) => {
-      setTimeout(() => el.classList.add('in'), i * 130);
+    target.querySelectorAll('.label,.prose,.small-prose,.hr-accent,.timestamp,.signature,.archive-close,.bridge-line,.june-interlude-word').forEach((el, i) => {
+      setTimeout(() => el.classList.add('in'), i * 120);
     });
-    target.querySelectorAll('.final-prose .line').forEach(l => l.classList.add('in'));
-    // Amplify city lights near june/drive sections
-    if (target.id === 'june-section' || target.id === 's6') {
-      cityEl.style.opacity = '0.75';
+    target.querySelectorAll('.final-prose .line,.dream-line,.wake-line').forEach((el, i) => {
+      setTimeout(() => el.classList.add('in'), i * 220);
+    });
+
+    if (target.id === 'june-interlude' || target.id === 'june-section') {
+      cityEl.style.opacity = '0.65';
+    } else if (target.id === 's6') {
+      cityEl.style.opacity = '0.82';
+      fadeInDriveAudio();
     } else {
-      cityEl.style.opacity = '0.55';
+      cityEl.style.opacity = '0.5';
+    }
+
+    if (target.id === 'final-section') {
+      chapterIndicator.classList.add('hidden');
+    } else {
+      chapterIndicator.classList.remove('hidden');
     }
   });
-}, { threshold: 0.15 });
+}, { threshold: 0.2 });
 
 sections.forEach(s => io.observe(s));
 
@@ -614,17 +754,27 @@ sections.forEach(s => io.observe(s));
 const sio = new IntersectionObserver((entries) => {
   entries.forEach(({ target, isIntersecting }) => {
     if (!isIntersecting) return;
-    const idx = [...sections].indexOf(target);
+    const idx = sections.indexOf(target);
     dots.forEach(d => d.classList.remove('active'));
     if (dots[idx]) dots[idx].classList.add('active');
   });
-}, { threshold: 0.5 });
+}, { threshold: 0.55 });
 sections.forEach(s => sio.observe(s));
 
-// Progress bar
+// Progress bar + light parallax for drive section
 window.addEventListener('scroll', () => {
   const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
   progress.style.width = pct + '%';
+
+  const drive = document.getElementById('s6');
+  const rect = drive.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const entered = Math.min(Math.max((vh - rect.top) / (vh + rect.height), 0), 1);
+  drive.querySelectorAll('[data-parallax]').forEach((el) => {
+    const scale = Number(el.dataset.parallax || 0);
+    const y = (entered - 0.5) * 60 * scale;
+    el.style.transform = `translateY(${y}px)`;
+  });
 }, { passive: true });
 
 // Section transition dither flash
@@ -632,7 +782,7 @@ let lastSec = -1;
 const tio = new IntersectionObserver((entries) => {
   entries.forEach(({ target, isIntersecting }) => {
     if (!isIntersecting) return;
-    const idx = [...sections].indexOf(target);
+    const idx = sections.indexOf(target);
     if (idx === lastSec) return;
     lastSec = idx;
     ditherOverlay.style.opacity = '0.18';
@@ -643,4 +793,3 @@ sections.forEach(s => tio.observe(s));
 </script>
 </body>
 </html>
-
